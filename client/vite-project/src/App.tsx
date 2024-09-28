@@ -3,17 +3,19 @@ import Navbar from "./components/Navbar";
 import TextEditor from "./components/TextEditor";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
+import { RecoilRoot } from "recoil";
 
 function App() {
   return (
     <div>
-      <BrowserRouter>
-        <Navbar/>
-        <Routes>
-          <Route path="/" element={<Navigate to={`/documents/${uuidv4()}`} />} />
-          <Route path="/documents/:id" element={<TextEditor />}/>
-        </Routes>
-      </BrowserRouter>
+      <RecoilRoot>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to={`/documents/${uuidv4()}`} />} />
+            <Route path="/documents/:id" element={<><Navbar/><TextEditor /></>}/>
+          </Routes>
+        </BrowserRouter>
+      </RecoilRoot>
     </div>
   );
 }

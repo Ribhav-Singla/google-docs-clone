@@ -3,6 +3,10 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {io, Socket} from 'socket.io-client';
+import { usePDF } from 'react-to-pdf';
+import { fileNameState } from "../recoil";
+import { downloadPdfState } from "../recoil";
+import { useRecoilValue } from "recoil";
 
 const SAVE_INTERVAL_MS = 2000
 
@@ -19,9 +23,18 @@ const TOOLBAR_OPTIONS = [
 ];
 
 function TextEditor() {
+  const fileName = useRecoilValue(fileNameState);
+  const { toPDF, targetRef } = usePDF({filename: `${fileName}.pdf`});
+  const downloadPdf = useRecoilValue(downloadPdfState);
   const {id: documentId} = useParams()
   const [socket,setSocket] = useState<Socket | undefined>()
   const [quill, setQuill] = useState<Quill | undefined>();
+
+  useEffect(()=>{
+    if(downloadPdf){
+      toPDF()
+    }
+  },[downloadPdf])
 
   useEffect(()=>{
     const s = io('http://localhost:3001')
@@ -84,6 +97,7 @@ function TextEditor() {
     }
   },[socket,quill])
 
+  
 
 
   const wrapperRef = useCallback((wrapper: HTMLDivElement | null) => {
@@ -102,12 +116,19 @@ function TextEditor() {
     q.disable()
     q.setText('Loading...')
     setQuill(q)
+
+    const qlEditor = wrapper.querySelector('.ql-editor')
+    if(qlEditor){
+      targetRef.current = qlEditor
+    }
   }, []);
 
   return (
+    <>
     <div className="container" ref={wrapperRef}>
       TextEditor
     </div>
+    </>
   );
 }
 
